@@ -1,0 +1,532 @@
+export function IssueCard(testCaseNumber) {
+    var formId = ''
+    var taskId = ''
+    const filepath = '/FileToBeUploaded.tif'
+    it('ReissueCard', function () {
+        cy.ntlm(['--------------- здесь наша внутренняя ссылка'], Cypress.env('login'), Cypress.env('password'), Cypress.env('domen'))
+        cy.request('GET', '--------------- здесь наша внутренняя ссылка' + testCaseNumber).then(
+            (response) => {
+                //Вход через СРМ
+                switch (response.body['СРМ']) {
+                    case 'ВКЛ':
+                        cy.request('GET', Cypress.env('changecrmflag') + Cypress.env('login') + Cypress.env('on')).then
+                            ((res) => {
+                                cy.log(res.body['errMassage'])
+                                cy.visit("http://" + Cypress.env('spmServer') + Cypress.env('clientDepartmentPort') + Cypress.env('url_issue')).wait(5000)
+                            })
+                        break
+                    default:
+                        cy.request('GET', Cypress.env('changecrmflag') + Cypress.env('login') + Cypress.env('off')).then
+                            ((res) => {
+                                cy.log(res.body['errMassage'])
+                                cy.visit("http://" + Cypress.env('spmServer') + Cypress.env('clientDepartmentPort') + Cypress.env('url_issue')).wait(5000)
+                                customerSearch(response)
+                                cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            })
+                }
+                //Данные клиента
+                if (response.body['ДАННЫЕ КЛИЕНТА'] == 'ТЕРРОР') {
+                    //1-кейс
+                    cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                    cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                    cy.get('.form-message form-message_view_default').should('not.to.be.empty')
+                }
+                else if (response.body['ДАННЫЕ КЛИЕНТА'] == 'ИПДЛ') {
+                    //2-кейс
+                    cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                    cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                    cy.get('.form-message form-message_view_default').should('not.to.be.empty')
+                }
+                else if (response.body['ДАННЫЕ КЛИЕНТА'] == 'БНП') {
+                    //3-кейс
+                    cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                    cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                    cy.get('.form-message form-message_view_default').should('not.to.be.empty')
+                }
+                else if (response.body['ДАННЫЕ КЛИЕНТА'] == 'Арест ЕК') {
+                    if (response.body['ИЗМЕНЕНИЕ ДАННЫХ'] == 'ДА') {
+                        //11-кейс
+                        changeData(response)
+                        cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.Select-placeholder').eq(0).click()
+                        cy.get('#react-select-2--option-1').click()
+                        cy.get('#radio_bindToExisting').click()
+                        cy.get('#select_cardAccount').select(1)
+		                cy.get('.Select-placeholder').eq(1).click()
+		                cy.get('#react-select-4--option-0').click()
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('#select_cardProduct_mainCard_cmCardId').select(1)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        tifDoc(response)
+                        sanctionCardAdmin()
+                        checkAutoUnloadXml()
+                    }
+                    else {
+                        //10-кейс
+                        cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.Select-placeholder').eq(0).click()
+                        cy.get('#react-select-2--option-1').click()
+		                cy.get('.Select-placeholder').eq(1).click()
+		                cy.get('#react-select-4--option-0').click()
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('#select_cardProduct_mainCard_cmCardId').select(1)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        tifDoc(response)
+                        sanctionCardAdmin()
+                        checkAutoUnloadXml()
+                    }
+                }
+                else if (response.body['ДАННЫЕ КЛИЕНТА'] == 'FATCA') {
+                    if (response.body['ИЗМЕНЕНИЕ ДАННЫХ'] == 'ДА') {
+                        //15-кейс
+                        changeData(response)
+                        cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.Select-placeholder').eq(0).click()
+                        cy.get('#react-select-2--option-0').click()
+                        cy.get('#radio_bindToExisting').click()
+                        cy.get('#select_cardAccount').select(1)
+		                cy.get('.Select-placeholder').eq(1).click()
+		                cy.get('#react-select-4--option-0').click()
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('#select_cardProduct_mainCard_cmCardId').select(1)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        formFatca(response)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(2500)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        tifDoc(response)
+                        sanctionCompDivision()
+                        checkAutoUnloadXml()
+                    }
+                    else {
+                        //14-кейс
+                        cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.Select-placeholder').eq(0).click()
+                        cy.get('#react-select-2--option-0').click()
+		                cy.get('.Select-placeholder').eq(1).click()
+		                cy.get('#react-select-4--option-0').click()
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('#select_cardProduct_mainCard_cmCardId').select(1)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        formFatca(response)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(2500)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        tifDoc(response)
+                        sanctionCompDivision()
+                        checkAutoUnloadXml()
+                    }
+                }
+                else {
+                    if (response.body['ИЗМЕНЕНИЕ ДАННЫХ'] == 'КРИТИЧНЫЕ ДАННЫЕ') {
+                        //6-кейс
+                        changeData(response)
+                        cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.Select-placeholder').eq(0).click()
+                        cy.get('#react-select-2--option-0').click()
+		                cy.get('.Select-placeholder').eq(1).click()
+		                cy.get('#react-select-4--option-0').click()
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('#select_cardProduct_mainCard_cmCardId').select(2)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        tifDoc(response)
+                        sanctionUL(response)
+                        checkAutoUnloadXml()
+                    }
+                    else if (response.body['УСЛОВИЕ'] == 'СПЕЦСЧЕТ') {
+                        if (response.body['ИЗМЕНЕНИЕ ДАННЫХ'] == 'ДА') {
+                            //8-кейс
+                            changeData(response)
+                            cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('.Select-placeholder').eq(0).click()
+                            cy.get('#react-select-2--option-3').click()
+                            cy.get('#radio_bindToExisting').click()
+                            cy.get('#select_cardAccount').select(1)
+		                    cy.get('.Select-placeholder').eq(1).click()
+		                    cy.get('#react-select-4--option-0').click()
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('#select_cardProduct_mainCard_cmCardId').select(1)
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            tifDoc(response)
+                            sanctionCardAdmin()
+                            checkAutoUnloadXml()
+                        }
+                        else {
+                            //7-кейс
+                            cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('.Select-placeholder').eq(0).click()
+                            cy.get('#react-select-2--option-3').click()
+		                    cy.get('.Select-placeholder').eq(1).click()
+		                    cy.get('#react-select-4--option-0').click()
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('#select_cardProduct_mainCard_cmCardId').select(1)
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            tifDoc(response)
+                            sanctionCardAdmin()
+                            checkAutoUnloadXml()
+                        }
+                    }
+                    else if (response.body['УСЛОВИЕ'] == 'ВОЗВРАТ НА ДОРАБОТКУ') {
+                        //9-кейс
+                        changeData(response)
+                        cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.Select-placeholder').eq(0).click()
+                        cy.get('#react-select-2--option-0').click()
+                        cy.get('#radio_bindToExisting').click()
+                        cy.get('#select_cardAccount').select(1)
+		                cy.get('.Select-placeholder').eq(1).click()
+		                cy.get('#react-select-4--option-0').click()
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('#select_cardProduct_mainCard_cmCardId').select(2)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        tifDoc(response)
+                        sanctionReturnRevision()
+                        checkAutoUnloadXml()
+                    }
+                    else if (response.body['УСЛОВИЕ'] == 'ПРЕМИАЛЬНАЯ КАРТА') {
+                        if (response.body['ВЫПУСК ДОП КАРТЫ'] == 'ДА') {
+                            //12-кейс
+                            cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('.Select-placeholder').eq(0).click()
+                            cy.get('#react-select-2--option-0').click()
+                            cy.get('.Select-placeholder').eq(1).click()
+                            cy.get('#react-select-4--option-0').click()
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('#check_selectShowPremium').click({ force: true }).wait(2000)
+                            cy.get('#select_cardProduct_mainCard_cmCardId').select(1)
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('label > input').click({ force: true })
+                            cy.get(':nth-child(1) > .col-sm-9 > .form-group > .col-sm-12 > .form-control').select(1)
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            tifDoc(response)
+                            sanctionCardAdmin()
+                            checkAutoUnloadXml()
+                        }
+                        else {
+                            //13-кейс
+                            changeData(response)
+                            cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('.Select-placeholder').eq(0).click()
+                            cy.get('#react-select-2--option-0').click()
+                            cy.get('.Select-placeholder').eq(1).click()
+                            cy.get('#react-select-4--option-0').click()
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('#check_selectShowPremium').click({ force: true }).wait(2000)
+                            cy.get('#select_cardProduct_mainCard_cmCardId').select(1)
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                            tifDoc(response)
+                            sanctionCardAdmin()
+                            checkAutoUnloadXml()
+                        }
+                    }
+                    else if (response.body['УСЛОВИЕ'] == 'АНКЕТА AML') {
+                        //16-кейс
+                        changeData(response)
+                        cy.get('#radio_isClientNotPresent_no').click()
+                        cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.Select-placeholder').eq(0).click()
+                        cy.get('#react-select-2--option-0').click()
+                        cy.get('.Select-placeholder').eq(1).click()
+                        cy.get('#react-select-4--option-0').click()
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('#select_cardProduct_mainCard_cmCardId').select(2)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        formAML(response)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        tifDoc(response)
+                        sanctionCardAdmin()
+                        checkAutoUnloadXml()
+                    }
+                    else if (response.body['ИЗМЕНЕНИЕ ДАННЫХ'] == 'ДА') {
+                        //5-кейс
+                        changeData(response)
+                        cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.Select-placeholder').eq(0).click()
+                        cy.get('#react-select-2--option-0').click()
+                        cy.get('#radio_bindToExisting').click()
+                        cy.get('#select_cardAccount').select(1)
+		                cy.get('.Select-placeholder').eq(1).click()
+		                cy.get('#react-select-4--option-0').click()
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('#select_cardProduct_mainCard_cmCardId').select(2)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        tifDoc(response)
+                        sanctionCardAdmin()
+                        checkAutoUnloadXml()
+                    }
+                    else {
+                        //4-кейс
+                        cy.get('#checkbox_model_isClientDataCorrect').click({ force: true })
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.Select-placeholder').eq(0).click()
+                        cy.get('#react-select-2--option-0').click()
+		                cy.get('.Select-placeholder').eq(1).click()
+		                cy.get('#react-select-4--option-0').click()
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('#select_cardProduct_mainCard_cmCardId').select(2)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+                        tifDoc(response)
+                        sanctionCardAdmin()
+                        checkAutoUnloadXml()
+                    }
+                }
+            }
+        )
+    }
+    )
+    //Поиск клиента
+    function customerSearch(response) {
+        cy.get('#input_filter_iin').type(response.body['ИИН'])
+        cy.get('.btn-block').eq(2).click({ force: true }).wait(5000)
+    }
+    //Изменение данных клиента
+    function changeData(response) { 
+        cy.get('.wizard-actions-btn.btn-default').contains('Изменить данные').click().wait(5000)
+        if (response.body['ИЗМЕНЕНИЕ ДАННЫХ'] == 'КРИТИЧНЫЕ ДАННЫЕ') {
+            cy.get('#FNAME').clear().type(response.body['ФАМИЛИЯ'])
+            cy.get('#INAME').clear().type(response.body['ИМЯ'])
+        }
+        cy.get(':nth-child(5) > .required > :nth-child(3) > .form-group > :nth-child(1) > .input-group > .form-control').type(response.body['СРОК ДЕЙСТВИЯ'])
+        cy.get('select#birthCountry1').select(1)
+        cy.get('select#MestoRoj1').select('г.Алматы')
+        cy.get('select#residentCountry1').select(1)
+        cy.get('select#residentStatus12').select(1)
+        cy.get('select#ValidateAgainst123').select(1)
+        cy.get('[value="Далее"]').click().wait(5000)
+        
+    }
+    //FATCA анкета. Заполнение
+    function formFatca(response) {
+        cy.get('#radio_youCitizenUSAnswer_yes').click()
+        cy.get('#input_data_answerTin').type(response.body['TIN'])
+        cy.get('#radio_youResidentUSAnswer_yes').click()
+        cy.get('#select_data_answerResidentUS').select('Держатель Грин Кард')
+        cy.get('#radio_youBornInUSAnswer_yes').click()
+        cy.get('#input_data_answerBornUS').type(response.body['АНКЕТА FATCA'])
+        cy.get('#radio_youHaveResidentialAddressAnswer_yes').click()
+        cy.get('#input_data_answerHaveAddressUS').type(response.body['АНКЕТА FATCA'])
+        cy.get('#radio_youHaveRegistrationAdressAnswer_yes').click()
+        cy.get('#input_data_answerHaveAddressRegUS').type(response.body['АНКЕТА FATCA'])
+        cy.get('#radio_youHaveTelephoneNumberInUSAnswer_yes').click()
+        cy.get('#input_data_answerHaveTelNumberUS').type(response.body['Phone USA'])
+        cy.get('#radio_youHaveResidentialAddressForEmailAnswer_yes').click()
+        cy.get('#input_data_answerAddressForEmailUS').type(response.body['АНКЕТА FATCA'])
+        cy.get('#checkbox_data_isVisibleDocs').click({ force: true })
+        cy.get('button.btn.btn-default.btn-block').contains('Да').click()
+        cy.get('input[type="file"]').eq(0).attachFile(filepath)
+        cy.get('input[type="file"]').eq(1).attachFile(filepath)
+        cy.get('input[type="file"]').eq(2).attachFile(filepath)
+        cy.get('input[type="file"]').eq(3).attachFile(filepath).wait(2000)
+    }
+    //Адресная доставка
+    function addressDostavka(response) {
+        cy.get('#input_withoutPin').click({ force: true })
+        cy.get('.Select-placeholder').click()
+        cy.get('.Select-menu-outer').type('АЛМАТЫ{enter}').wait(1000)
+        cy.get('#input_delivery_street').type(response.body['street'])
+        cy.get('#input_delivery_buildingNumber').type(response.body['house'])
+        cy.get('.wizard-actions-btn.btn.btn-default').contains('Далее').click().wait(10000)
+        cy.wait(10000)
+    }
+    //Вложение TIF файлов
+    function tifDoc(response) {
+        if (response.body['УСЛОВИЕ'] == 'СПЕЦСЧЕТ' && response.body['ИЗМЕНЕНИЕ ДАННЫХ'] == 'ДА') {
+            cy.get('input[type="file"]').eq(0).attachFile(filepath)
+            cy.get('input[type="file"]').eq(1).attachFile(filepath)
+            cy.get('input[type="file"]').eq(2).attachFile(filepath)
+            cy.get('input[type="file"]').eq(3).attachFile(filepath).wait(2000)
+        }
+        else if (response.body['ДАННЫЕ КЛИЕНТА'] == 'FATCA') {
+            cy.get('input[type="file"]').eq(0).attachFile(filepath)
+            cy.get('input[type="file"]').eq(1).attachFile(filepath).wait(2000)
+        }
+        else {
+            cy.get('input[type="file"]').eq(0).attachFile(filepath)
+            cy.get('input[type="file"]').eq(1).attachFile(filepath)
+            cy.get('input[type="file"]').eq(2).attachFile(filepath).wait(2000) 
+        }
+    }
+    //Ввести имеющийся ДН
+    function DN() {
+        cy.get(':nth-child(4) > .form-section__body > .collapse > :nth-child(5) > .row > :nth-child(1) > .form-group > .col-sm-8 > .form-control').invoke('val').then((num) => {
+            cy.get('.secret-text-input__inner').click().wait(500)
+            var telnumber = num.substring(5, 8) + '' + num.substring(11, num.length)
+            cy.get('.col-sm-9 > .form-control').type(telnumber)
+        }
+        )
+        cy.get(':nth-child(3) > .col-xs-12').click()
+        cy.wait(5000)
+    }
+    //Заполнение AML-анкеты
+    function formAML(response) {
+        cy.get('#select_clientInfo_citizenship').select(1)
+        cy.get('#maskedInput_workInfo_jobPeriod').type(response.body['ПЕРИОД РАБОТЫ'])
+        cy.get('input[type="radio"][id="radio_MonthlyAverageIncome"][value="8"]').click()
+        cy.get('#checkbox_amlData_completenessInformationAssurance').click({ force: true })
+        cy.get('#checkbox_amlData_personalDataProcessingConsent').click({ force: true })
+    }
+    //Comp Division санкция
+    function sanctionCompDivision() {
+        //Получение номера заявки
+        cy.get('.wizard-info__text-block > :nth-child(1)').then(($result) => {
+            formId = $result.text().replace(/^\D+/g, '')
+            // Отправка заявки
+            cy.get('#button_next').contains('Отправить').click()
+            cy.get('button.btn-default.btn-block[type="button"]').contains('Да').click()
+            cy.wait(10000)
+            // Отправка заявки из стадии CompDivision на стадию DeepBlue
+            cy.request('GET', Cypress.env('send_url') + formId + '&action=Одобрить').then(
+                () => {
+                    cy.wait(10000)
+                    cy.request('GET', Cypress.env('send_url') + formId + '&action=Отправить').then(
+                        (response) => {
+                            cy.wait(10000)
+                            // Получение TaskId на этапе карт. админа
+                            cy.request('GET', Cypress.env('gettask_url') + formId).then(
+                                (response) => {
+                                    taskId = response.body['taskId']
+                                    // Открытие заявки от карт. админа
+                                    window.localStorage.removeItem('authToken')
+                                    cy.ntlmReset()
+                                    cy.ntlm(['*.halykbank.nb', '*.homebank.kz', '*.test.dev', '172.16.*', '172.16.143.69'], Cypress.env('login_ul'), Cypress.env('password_ul'), Cypress.env('domen'))
+                                    cy.visit("http://" + Cypress.env('spmServer') + Cypress.env('clientDepartmentPort') + "/usertask/" + taskId)
+                                    cy.wait(10000)
+                                    //Одобрение заявки
+                                    cy.get('.col-sm-8 > .wizard-actions-toolbar > :nth-child(2)').click()
+                                    cy.get('.row > :nth-child(1) > .btn').click()
+                                    cy.wait(10000)
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+        }
+        )
+    }
+    //Санкция через карт админ
+    function sanctionCardAdmin() {
+        //Получение номера заявки
+        cy.get('.wizard-info__text-block > :nth-child(1)').then(($result) => {
+            formId = $result.text().replace(/^\D+/g, '')
+            // Отправка заявки
+            cy.get('#button_next').contains('Отправить').click()
+            cy.get('button.btn-default.btn-block[type="button"]').contains('Да').click().wait(10000)
+            // Отправка заявки из стадии DeepBlue на стадию карточного админа
+            cy.request('GET', Cypress.env('send_url') + formId + '&action=Отправить').then(
+                () => {
+                    cy.wait(10000)
+                    // Получение TaskId на этапе карт. админа
+                    cy.request('GET', Cypress.env('gettask_url') + formId).then(
+                        (response) => {
+                            taskId = response.body['taskId']
+                            // Открытие заявки от кард. админа
+                            window.localStorage.removeItem('authToken')
+                            cy.ntlmReset()
+                            cy.ntlm(['*.halykbank.nb', '*.homebank.kz', '*.test.dev', '172.16.*', '172.16.143.69'], Cypress.env('login_ul'), Cypress.env('password_ul'), Cypress.env('domen'))
+                            cy.visit("http://" + Cypress.env('spmServer') + Cypress.env('clientDepartmentPort') + "/usertask/" + taskId).wait(10000)
+                            //Одобрение заявки
+                            cy.get('.col-sm-8 > .wizard-actions-toolbar > :nth-child(2)').click()
+                            cy.get('.row > :nth-child(1) > .btn').click().wait(10000)
+                        }
+                    )
+                }
+            )
+        }
+        )
+    }
+    //UL санкция
+    function sanctionUL() {
+        //Получение номера заявки
+        cy.get('.wizard-info__text-block > :nth-child(1)').then(($result) => {
+            formId = $result.text().replace(/^\D+/g, '')
+            // Отправка заявки
+            cy.get('#button_next').contains('Отправить').click()
+            cy.get('button.btn-default.btn-block[type="button"]').contains('Да').click()
+            cy.wait(20000)
+            // Санкционирование заявки из стадии UL на стадию DeepBlue
+            cy.request('GET', Cypress.env('send_url') + formId + '&action=санкционировать').then(
+                () => {
+                    cy.wait(10000)
+                    window.localStorage.removeItem('authToken')
+                    cy.ntlmReset()
+                    cy.ntlm(['*.halykbank.nb', '*.homebank.kz', '*.test.dev', '172.16.*', '172.16.143.69'], Cypress.env('login_ul'), Cypress.env('password_ul'), Cypress.env('domen'))
+                    cy.request('GET', Cypress.env('send_url') + formId + '&action=Отправить').then(
+                        () => {
+                            cy.wait(10000)
+                            // Получение TaskId на этапе карт. админа
+                            cy.request('GET', Cypress.env('gettask_url') + formId).then(
+                                (response) => {
+                                    taskId = response.body['taskId']
+                                    // Открытие заявки от кард. админа
+                                    window.localStorage.removeItem('authToken')
+                                    cy.ntlmReset()
+                                    cy.ntlm(['*.halykbank.nb', '*.homebank.kz', '*.test.dev', '172.16.*', '172.16.143.69'], Cypress.env('login_ul'), Cypress.env('password_ul'), Cypress.env('domen'))
+                                    cy.visit("http://" + Cypress.env('spmServer') + Cypress.env('clientDepartmentPort') + "/usertask/" + taskId)
+                                    cy.wait(20000)
+                                    //Одобрение заявки
+                                    //cy.get('.col-sm-12 > .form-group > .col-sm-10 > .form-control').type(response.body['textOdobrenie'])
+                                    cy.get('.col-sm-12 > .form-group > .col-sm-10 > .form-control').type('testtesttesttesttest')
+                                    cy.get('.wizard-actions-toolbar > :nth-child(2)').click()
+                                    cy.get('.row > :nth-child(1) > .btn').click()
+                                    cy.wait(10000)
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+        }
+        )
+    }
+    //Проверка выгрузка карты
+    function checkAutoUnloadXml() {
+        check(0)
+        function check(i) {
+            if (i > 4) {
+                throw new Error('Карта не выгрузилась!!! Проверьте WinService -> OnlineAutoUnloadXML')
+            } else {
+                cy.request('GET', '--------------- здесь наша внутренняя ссылка' + formId)
+                    .then((response) => {
+                        if (response.body['status'] == 1 && response.body['declined'] == 0 && response.body['obrabotan'] == 1 && response.body['card_id'] != null) {
+                            expect(response.status).to.eq(200)
+                        }
+                        else {
+                            cy.wait(30000)
+                            check(i+1)
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
